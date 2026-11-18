@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — comps-fit-1</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark">◉</div>
+    <div>
+      <h1>Token Radar</h1>
+      <p class="sub">Which pre-token protocol is worth farming next — priced by the market, not by a list.</p>
+    </div>
+  </div>
+  <div class="meta">
+    <span id="asof"></span>
+    <span id="modeltag"></span>
+  </div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<nav class="tabs">
+  <button data-view="board" class="on">Board</button>
+  <button data-view="model">Model &amp; validation</button>
+  <button data-view="anchors">Traded anchors</button>
+  <button data-view="about">How it works</button>
+</nav>
+
+<main>
+  <section id="view-board" class="view on">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search name, slug or category…" aria-label="Search">
+      <select id="cat" aria-label="Category"><option value="">All categories</option></select>
+      <select id="sort" aria-label="Sort">
+        <option value="rank">Sort: rank</option>
+        <option value="implied">Sort: implied value</option>
+        <option value="tvl">Sort: TVL</option>
+        <option value="growth">Sort: 7d growth</option>
+        <option value="age">Sort: age</option>
+        <option value="multiple">Sort: value / TVL</option>
+      </select>
+      <label class="watchonly"><input type="checkbox" id="watchonly"> Watchlist only</label>
+      <span id="count" class="count"></span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Protocol</th><th>Category</th><th>Chains</th>
+          <th class="num">TVL</th><th class="num">7d</th><th class="num">Age</th>
+          <th class="num">Implied value</th><th class="num">Value range</th><th class="num">× TVL</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Click a row for its detail view: the model breakdown, the value range and the farm plan.</p>
+  </section>
+
+  <section id="view-model" class="view">
+    <div class="cards">
+      <div class="card">
+        <h2>The fitted model</h2>
+        <p id="equation" class="eq"></p>
+        <p id="fitstats"></p>
+        <p class="note">The model is fitted on the protocols whose tokens already trade. It learns how the
+        market prices a protocol from its TVL, its seven-day growth, how long it has run and how
+        many chains it is on — then it prices the protocols that have not launched yet. No protocol
+        name is ever special-cased: the same fit scores every row.</p>
+      </div>
+      <div class="card">
+        <h2>Tested out of sample</h2>
+        <p id="loostats"></p>
+        <p class="note">Leave-one-out: each traded protocol is held out in turn, the model is refitted
+        without it, and the held-out market cap is predicted. The error below is what the model
+        gets wrong on tokens it has never seen — the honest measure of the fit, not its in-sample
+        score. The value range on every row comes from 200 bootstrap refits: resample the traded
+        set, refit, predict again, and take the 10th–90th percentile.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-anchors" class="view">
+    <p class="note">The traded tokens are the anchors: the market's own prices, against the fitted
+    value for the same protocol. A model that cannot price what already trades cannot price
+    what has not launched yet.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Protocol</th><th>Category</th><th class="num">TVL</th>
+          <th class="num">Market cap</th><th class="num">Fitted value</th><th class="num">Fitted / actual</th>
+        </tr></thead>
+        <tbody id="anchors"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-about" class="view">
+    <div class="cards">
+      <div class="card">
+        <h2>How to read this radar</h2>
+        <ol>
+          <li><b>Implied value</b> is what the fitted model says the protocol's token would be
+          worth at launch, given its TVL, growth, age and chains — priced off the traded comps.</li>
+          <li><b>Value range</b> is the 10th–90th percentile over 200 refits: a wide range means
+          the model is unsure; a narrow one means the comps agree.</li>
+          <li><b>Rank range</b> is where the protocol would sit if its value were at either end
+          of that range.</li>
+          <li><b>Farm plan</b> sizes the deposit by the protocol's TVL and states the gas and the
+          time of every step. Thin means the plan costs more than the position is worth — skip it.</li>
+          <li>The board covers <b>every rankable pre-token protocol in the snapshot</b> (198 of
+          the 342 that record no token; exchanges, bridges, liquid-staking and restaked
+          products, wrapped names, versioned pools and exchange-named protocols are set aside,
+          as the snapshot's own watchlist rule does), not just the watchlist: the watchlist is
+          the floor, never the ceiling.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h2>What this radar does not do</h2>
+        <p class="note">It does not predict whether or when a token is issued. The implied value is
+        this entry's own claim about what a launch would be worth if the protocol's record stayed
+        as it is. A protocol the snapshot says records no token may still have one its DefiLlama
+        record does not carry — so the board says a protocol <i>records</i> no token, never that it
+        has none. Farm at your own risk; a claim that asks for a fee or a seed phrase is a scam.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="detail" class="view detail"></section>
+</main>
+
+<footer>
+  <p>Token Radar · model <span id="footmodel"></span> · snapshot <span id="footasof"></span> ·
+  board covers the whole watchlist plus every pre-token protocol below it · no network, no tracking.</p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
